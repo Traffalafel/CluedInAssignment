@@ -61,10 +61,10 @@ namespace CluedInAssignment
                 "Company name",
                 "Website",
                 "Contact email",
-                "VAT no.",
                 "Country",
                 "City",
-                "Street"
+                "Street",
+                "VAT no."
             };
 
             string tableString = "";
@@ -84,10 +84,10 @@ namespace CluedInAssignment
                     company.Name,
                     company.Website,
                     company.ContactEmail,
-                    company.VatNumber,
                     company.Address.Country,
                     company.Address.City,
-                    company.Address.Street
+                    company.Address.Street,
+                    company.VatNumber
                 }
             ).ToArray();
 
