@@ -53,7 +53,8 @@ namespace CluedInAssignment
             var colWidths = new int[n_cols];
             for (int i = 0; i < n_cols; i++)
             {
-                colWidths[i] = determineColumnWidth(table.Select(row => row[i]));
+                var col = table.Select(row => row[i]);
+                colWidths[i] = determineColumnWidth(col);
             }
 
             string[] headerRow = new string[]
@@ -90,6 +91,17 @@ namespace CluedInAssignment
                     company.Address.Street
                 }
             ).ToArray();
+            for (int row_i = 0; row_i < table.Length; row_i++)
+            {
+                for (int col_i = 0; col_i < table[0].Length; col_i++)
+                {
+                    if (table[row_i][col_i] == null)
+                    {
+                        table[row_i][col_i] = "<missing>";
+                    }
+                }
+
+            }
             return table;
         }
 
