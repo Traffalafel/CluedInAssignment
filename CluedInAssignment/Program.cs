@@ -29,10 +29,10 @@ namespace CluedInAssignment
                 return;
             }
 
-            List<Company> companies;
+            IEnumerable<Company> companies;
             try
             {
-                companies = JsonConvert.DeserializeObject<List<Company>>(response.Content);
+                companies = JsonConvert.DeserializeObject<IEnumerable<Company>>(response.Content);
             }
             catch (Exception e)
             {
@@ -44,20 +44,19 @@ namespace CluedInAssignment
             Console.WriteLine(createCompaniesTableString(companies));
         }
 
-        private static string createCompaniesTableString(List<Company> companies)
+        private static string createCompaniesTableString(IEnumerable<Company> companies)
         {
             string[][] table = createCompaniesTable(companies);
-            int n_rows = table.Length;
-            int n_cols = table[0].Length;
 
+            int n_cols = table[0].Length;
             var colWidths = new int[n_cols];
             for (int i = 0; i < n_cols; i++)
             {
-                var col = table.Select(row => row[i]);
+                var col = table.Select(row => row[i]).ToArray();
                 colWidths[i] = determineColumnWidth(col);
             }
 
-            string[] headerRow = new string[]
+            var headerRow = new string[]
             {
                 "Company name",
                 "Website",
@@ -70,7 +69,7 @@ namespace CluedInAssignment
 
             string tableString = "";
             tableString += createRowString(headerRow, colWidths);
-            tableString += new string('-', colWidths.Sum()) + '\n';
+            tableString += new string('-', colWidths.Sum() - 2) + '\n';
             foreach (var row in table)
             {
                 tableString += createRowString(row, colWidths);
@@ -78,12 +77,12 @@ namespace CluedInAssignment
             return tableString;
         }
 
-        private static string[][] createCompaniesTable(List<Company> companies)
+        private static string[][] createCompaniesTable(IEnumerable<Company> companies, string nullSubstitute="<missing>")
         {
             var table = companies.Select(company =>
                 new string[] {
                     company.Name,
-                    company.WebsiteUrl,
+                    company.Website,
                     company.ContactEmail,
                     company.VatNumber,
                     company.Address.Country,
@@ -91,24 +90,27 @@ namespace CluedInAssignment
                     company.Address.Street
                 }
             ).ToArray();
+
+            // Replace all nulls with substitute value
             for (int row_i = 0; row_i < table.Length; row_i++)
             {
                 for (int col_i = 0; col_i < table[0].Length; col_i++)
                 {
                     if (table[row_i][col_i] == null)
                     {
-                        table[row_i][col_i] = "<missing>";
+                        table[row_i][col_i] = nullSubstitute;
                     }
                 }
 
             }
+            
             return table;
         }
 
-        private static int determineColumnWidth(IEnumerable<string> values)
+        private static int determineColumnWidth(string[] values)
         {
             var maxLength = values.Max(v => v.Length);
-            return maxLength + 3;
+            return maxLength + 2;
         }
 
         private static string createRowString(string[] row, int[] colWidths)

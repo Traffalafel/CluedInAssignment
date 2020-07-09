@@ -11,7 +11,7 @@ namespace CluedInAssignment.Models
         public string Name { get; set; }
 
         [JsonProperty(PropertyName = "website")]
-        public string WebsiteUrl { get; set; }
+        public string Website { get; set; }
 
         [JsonProperty(PropertyName = "contactEmail")]
         public string ContactEmail { get; set; }
