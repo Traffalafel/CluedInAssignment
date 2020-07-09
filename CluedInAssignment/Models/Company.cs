@@ -13,6 +13,9 @@ namespace CluedInAssignment.Models
         [JsonProperty(PropertyName = "website")]
         public string WebsiteUrl { get; set; }
 
+        [JsonProperty(PropertyName = "contactEmail")]
+        public string ContactEmail { get; set; }
+
         [JsonProperty(PropertyName = "vatNumber")]
         public string VatNumber { get; set; }
 

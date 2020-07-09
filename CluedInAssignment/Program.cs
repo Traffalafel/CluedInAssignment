@@ -3,27 +3,12 @@ using RestSharp;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using CluedInAssignment.Models;
+using System.Linq;
 
 namespace CluedInAssignment
 {
     class Program
     {
-        private static string companiesTable(List<Company> companies)
-        {
-            int width = 73;
-            string table = "";
-            
-            // Header
-            table += string.Format(" {0,-40} {1,-20} {2,-10}\n", "Company name", "Website URL", "VAT number");
-            table += new string('-', width);
-            table += "\n";
-            
-            foreach (var company in companies)
-            {
-                table += string.Format(" {0,-40} {1,-20} {2,-10}\n", company.Name, company.WebsiteUrl, company.VatNumber);
-            }
-            return table;
-        }
 
         static void Main()
         {
@@ -39,7 +24,8 @@ namespace CluedInAssignment
 
             if (!response.IsSuccessful)
             {
-                Console.WriteLine("Error: Server response invalid");
+                Console.WriteLine("Error: Request unsuccessful");
+                Console.WriteLine(response.ErrorMessage);
                 return;
             }
 
@@ -48,14 +34,81 @@ namespace CluedInAssignment
             {
                 companies = JsonConvert.DeserializeObject<List<Company>>(response.Content);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Console.WriteLine("Error: Data invalid");
+                Console.WriteLine("Error: Data format invalid");
+                Console.WriteLine(e.Message);
                 return;
             }
 
-            Console.WriteLine(companiesTable(companies));
-
+            Console.WriteLine(createCompaniesTableString(companies));
         }
+
+        private static string createCompaniesTableString(List<Company> companies)
+        {
+            string[][] table = createCompaniesTable(companies);
+            int n_rows = table.Length;
+            int n_cols = table[0].Length;
+
+            var colWidths = new int[n_cols];
+            for (int i = 0; i < n_cols; i++)
+            {
+                colWidths[i] = determineColumnWidth(table.Select(row => row[i]));
+            }
+
+            string[] headerRow = new string[]
+            {
+                "Company name",
+                "Website",
+                "Contact email",
+                "VAT no.",
+                "Country",
+                "City",
+                "Street"
+            };
+
+            string tableString = "";
+            tableString += createRowString(headerRow, colWidths);
+            tableString += new string('-', colWidths.Sum()) + '\n';
+            foreach (var row in table)
+            {
+                tableString += createRowString(row, colWidths);
+            }
+            return tableString;
+        }
+
+        private static string[][] createCompaniesTable(List<Company> companies)
+        {
+            var table = companies.Select(company =>
+                new string[] {
+                    company.Name,
+                    company.WebsiteUrl,
+                    company.ContactEmail,
+                    company.VatNumber,
+                    company.Address.Country,
+                    company.Address.City,
+                    company.Address.Street
+                }
+            ).ToArray();
+            return table;
+        }
+
+        private static int determineColumnWidth(IEnumerable<string> values)
+        {
+            var maxLength = values.Max(v => v.Length);
+            return maxLength + 3;
+        }
+
+        private static string createRowString(string[] row, int[] colWidths)
+        {
+            string rowString = "";
+            for (int i = 0; i < row.Length; i++)
+            {
+                rowString += row[i].PadRight(colWidths[i], ' ');
+            }
+            rowString += '\n';
+            return rowString;
+        }
+
     }
 }
